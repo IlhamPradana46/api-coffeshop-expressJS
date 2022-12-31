@@ -1,7 +1,9 @@
 const Product = require('../models/ProductModel');
 const response = require('../utils/response');
 const fs = require('fs');
+const {productValidation} = require('../middleware/validation');
 
+// Show All Product
 const showProduct = async (req, res) => {
     try {
         const showProduct = await Product.findAll();
@@ -11,6 +13,7 @@ const showProduct = async (req, res) => {
     }
 }
 
+// Show Product By ID
 const showProductById = async (req, res) => {
     
     id = req.params.idProduct;
@@ -21,29 +24,34 @@ const showProductById = async (req, res) => {
 
 }
 
+// Insert Product
 const insertProduct = async (req, res) => {
     
-    if (req.file == null) {
-        res.status(400).json({message : "Product image not filled !"});  
-    } else {
+    //Validate if form image not filled
+    if (req.file == null) return res.status(400).json({message : "Product image not filled !"});  
         
-        let imgName = req.file.filename
-        
-        const data = {
-            product_name : req.body.product_name,
-            stock : req.body.stock,
-            price : req.body.price,
-            image : imgName,
-            url_image : `${req.protocol}://${req.get('host')}/${imgName}`
-        }
-        
-        try {
-            Product.create(data);
-            response.success(200, data, "Insert Data Product Successfuly!", res);
-        } catch (error) {
-            response.error(400, err, "Insert Data Prodcut Failed ! ", res);
-        }
-    } 
+    const {error} = productValidation(req.body);
+    if (error) {
+        const errMsg = error.details[0].message
+        return response.error(400,error.details,errMsg,res)
+    }   
+
+    let imgName = req.file.filename
+
+    const data = {
+        product_name : req.body.product_name,
+        stock : req.body.stock,
+        price : req.body.price,
+        image : imgName,
+        url_image : `${req.protocol}://${req.get('host')}/${imgName}`
+    }
+    
+    try {
+        Product.create(data);
+        return response.success(200, data, "Insert Data Product Successfuly!", res);
+    } catch (error) {
+        return response.error(400, error, "Insert Data Prodcut Failed ! ", res);
+    }
 }
     
 const updateProduct = async (req, res) => {
@@ -55,6 +63,12 @@ const updateProduct = async (req, res) => {
     const data =  findProductById.dataValues
 
     if(findProductById == null) return res.status(404).json({message : "Product data not found !"});
+
+    const {error} =  await productValidation(req.body);
+    if (error) {
+        const errMsg = error.details[0].message
+        return response.error(400,error.details,errMsg,res)
+    }   
 
     if ( req.file == null ) {
         console.log("ok");
@@ -77,6 +91,7 @@ const updateProduct = async (req, res) => {
         }
     } else {
         try {
+            fs.unlinkSync(`public/images/${data.image}`);
             console.log("update pake gambar ni boss");
             let imgName = req.file.filename
             await Product.update({
@@ -91,7 +106,7 @@ const updateProduct = async (req, res) => {
                     id : findId
                 }
             });
-            fs.unlinkSync(`public/images/${data.image}`);
+            
             response.success(200, req.body , "Product data updated !", res);
         } catch (error) {
             response.error(500, error, "Update data failed !", res);
@@ -108,9 +123,9 @@ const deleteProduct = async (req, res) => {
     const data =  findProductById.dataValues;
 
     try {
-       await Product.destroy({where : {id : findId}}); 
+        await Product.destroy({where : {id : findId}}); 
         fs.unlinkSync(`public/images/${data.image}`);
-        console.log(data.image);
+
         response.success(200, req.body , "Product data deleted !", res);
     } catch (error) {
         response.error(500, error, "Delete data failed !", res);

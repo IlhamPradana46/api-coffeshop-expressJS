@@ -13,7 +13,7 @@ const {DataTypes} = Sequelize;
             type: DataTypes.STRING
         },
         stock: {
-            type: DataTypes.STRING
+            type: DataTypes.INTEGER
         },
         price: {
             type: DataTypes.INTEGER

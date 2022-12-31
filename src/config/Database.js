@@ -1,7 +1,7 @@
 const dbConfig = require("./dbConfig");
 const Sequelize = require('sequelize');
 
-const db = new Sequelize( dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
+const sequelize = new Sequelize( dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
         host : dbConfig.HOST,
         dialect : dbConfig.dialect,
         pool : {
@@ -12,4 +12,4 @@ const db = new Sequelize( dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
         }
     });
 
-    module.exports = db;
+    module.exports = sequelize;

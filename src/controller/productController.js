@@ -73,7 +73,7 @@ const updateProduct = async (req, res) => {
             });
             response.success(200, req.body , "Product data updated !", res);
         } catch (error) {
-            response.error(500, err, "Update data failed !", res);
+            response.error(500, error, "Update data failed !", res);
         }
     } else {
         try {

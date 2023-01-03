@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const upload = require('./src/middleware/uploadImage');
 
 require('dotenv').config();
 
@@ -15,6 +16,8 @@ app.use(cors(corsOption));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
+
+// app.use(upload.single('photo'));
 
 app.use(express.static('public/images'));
 

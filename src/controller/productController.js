@@ -1,7 +1,9 @@
 const Product = require('../models/ProductModel');
 const response = require('../utils/response');
+const {validationResult} = require('express-validator');
+const {doProductVal} = require('../middleware/validator/productValidation');
 const fs = require('fs');
-const {productValidation} = require('../middleware/validation');
+
 
 // Show All Product
 const showProduct = async (req, res) => {
@@ -12,6 +14,7 @@ const showProduct = async (req, res) => {
         res.json(error)
     }
 }
+
 
 // Show Product By ID
 const showProductById = async (req, res) => {
@@ -24,18 +27,19 @@ const showProductById = async (req, res) => {
 
 }
 
+
 // Insert Product
 const insertProduct = async (req, res) => {
     
     //Validate if form image not filled
     if (req.file == null) return res.status(400).json({message : "Product image not filled !"});  
         
-    const {error} = productValidation(req.body);
-    if (error) {
-        const errMsg = error.details[0].message
-        return response.error(400,error.details,errMsg,res)
-    }   
+    // Validate form input
+    const errors = validationResult(req);
 
+    if(!errors.isEmpty()) return response.error(422, errors, "validation error", res);
+
+    // get image filename
     let imgName = req.file.filename
 
     const data = {
@@ -54,24 +58,26 @@ const insertProduct = async (req, res) => {
     }
 }
     
+
+//update product
 const updateProduct = async (req, res) => {
     
     findId = req.params.idProduct
     
+    // validate if id product is exist or not
     const findProductById = await Product.findOne({ where : { id : findId }});
 
     const data =  findProductById.dataValues
 
+    // validate if id product is not exist
     if(findProductById == null) return res.status(404).json({message : "Product data not found !"});
 
-    const {error} =  await productValidation(req.body);
-    if (error) {
-        const errMsg = error.details[0].message
-        return response.error(400,error.details,errMsg,res)
-    }   
+    // validation if form not completly filled
+    const errors = validationResult(req);
 
-    if ( req.file == null ) {
-        console.log("ok");
+    if(!errors.isEmpty()) return response.error(422, errors, "validation error", res);
+    
+    if ( req.file == null ) { // update if image not uploaded 
         try {
             await Product.update({
                 product_name : req.body.product_name,
@@ -89,11 +95,14 @@ const updateProduct = async (req, res) => {
         } catch (error) {
             response.error(500, error, "Update data failed !", res);
         }
-    } else {
+    } else { // update if image uploaded
         try {
+
+            // delete the old images
             fs.unlinkSync(`public/images/${data.image}`);
-            console.log("update pake gambar ni boss");
+
             let imgName = req.file.filename
+
             await Product.update({
                 product_name : req.body.product_name,
                 stock : req.body.stock,
@@ -114,10 +123,15 @@ const updateProduct = async (req, res) => {
     }
 }
 
+
+// Delete product
 const deleteProduct = async (req, res) => {
     findId = req.params.idProduct
     
+    // validate if id product is exist or not
     const findProductById = await Product.findOne({ where : { id : findId }});
+    
+    // validate if id product is not exist
     if(findProductById == null) return res.status(404).json({message : "Product data not found !"});
     
     const data =  findProductById.dataValues;

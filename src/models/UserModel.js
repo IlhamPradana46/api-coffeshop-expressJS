@@ -12,6 +12,9 @@ const {DataTypes} = Sequelize;
         username : {
             type : DataTypes.STRING
         },
+        role : {
+            type : DataTypes.STRING
+        },
         password : {
             type : DataTypes.STRING
         }

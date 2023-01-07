@@ -1,7 +1,6 @@
 const Product = require('../models/ProductModel');
 const response = require('../utils/response');
 const {validationResult} = require('express-validator');
-const {doProductVal} = require('../middleware/validator/productValidation');
 const fs = require('fs');
 
 

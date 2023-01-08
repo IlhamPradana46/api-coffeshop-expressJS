@@ -17,7 +17,11 @@ const {DataTypes} = Sequelize;
         },
         password : {
             type : DataTypes.STRING
+        },
+        refresh_token : {
+            type : DataTypes.STRING
         }
+
     });
 
 module.exports = User;

@@ -1,11 +1,12 @@
 const User = require('../models/UserModel');
 const jwt = require('jsonwebtoken');
 
+
 const refreshToken = async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
-        if(!refreshToken) return res.sendStatus(401);
-
+        if(!refreshToken) return res.status(401).json({msg : 'refresh token not exists'});
+        
         const user = await User.findOne({
             where : {
                 refresh_token : refreshToken
@@ -22,7 +23,8 @@ const refreshToken = async (req, res) => {
             const role = user.role;
             const accessToken = jwt.sign({userId, username, role}, process.env.ACCESS_TOKEN_SEC, {expiresIn : '15s'});
 
-            res.json({jwt_refresh_token : accessToken});
+            res.json(accessToken);
+
         })
     } catch (error) {
         res.json(error);

@@ -11,7 +11,7 @@ const login =  async (req, res) => {
     const {username, password} = req.body
 
     const user = await User.findOne({ where : { username : username }});
-    // if(!user) return res.status(404).json({msg : 'You dont have an account! please register !'});
+    if(!user) return response.error(404, "Error" ,"You dont have an account! please register !", res)
 
     const hashedPassword = user.password
     

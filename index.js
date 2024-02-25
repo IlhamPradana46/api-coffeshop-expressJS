@@ -18,10 +18,10 @@ app.use(helmet.xssFilter());
 
 const corsOption = {
     origin : `http://localhost:3000`,
-    credential : true
+    credentials : true,
 }
 app.use(cors(corsOption));
-
+    
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
